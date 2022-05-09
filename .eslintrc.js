@@ -12,6 +12,6 @@ module.exports = {
   },
   rules: {
     'import/prefer-default-export': 'off',
-    "allowArrowFunctions": true,
+    'max-len': ['error', { code: 120 }],
   },
 };
