@@ -16,6 +16,73 @@ container.appendChild(textArea);
 
 body.appendChild(container);
 
+const keyLayout = [
+  '`',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '0',
+  '-',
+  '=',
+  'backspace',
+  'tab',
+  'q',
+  'w',
+  'e',
+  'r',
+  't',
+  'y',
+  'u',
+  'i',
+  'o',
+  'p',
+  '[',
+  ']',
+  '\\',
+  'del',
+  'caps lock',
+  'a',
+  's',
+  'd',
+  'f',
+  'g',
+  'h',
+  'j',
+  'k',
+  'l',
+  ';',
+  '\'',
+  'enter',
+  'Shift',
+  'z',
+  'x',
+  'c',
+  'v',
+  'b',
+  'n',
+  'm',
+  ',',
+  '.',
+  '/',
+  '↑',
+  'shift',
+  'ctrl',
+  'win',
+  'alt',
+  'space',
+  'alt',
+  '←',
+  '↓',
+  '→',
+  'ctrl',
+];
+
 const Keyboard = {
   elements: {
     main: null,
@@ -24,7 +91,7 @@ const Keyboard = {
   },
 
   eventHandlers: {
-    oniput: null,
+    oninput: null,
   },
 
   properties: {
@@ -51,72 +118,6 @@ const Keyboard = {
 
   createKeys() {
     const fragment = document.createDocumentFragment();
-    const keyLayout = [
-      '`',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '0',
-      '-',
-      '=',
-      'backspace',
-      'tab',
-      'q',
-      'w',
-      'e',
-      'r',
-      't',
-      'y',
-      'u',
-      'i',
-      'o',
-      'p',
-      '[',
-      ']',
-      '\\',
-      'del',
-      'caps lock',
-      'a',
-      's',
-      'd',
-      'f',
-      'g',
-      'h',
-      'j',
-      'k',
-      'l',
-      ';',
-      '\'',
-      'enter',
-      'Shift',
-      'z',
-      'x',
-      'c',
-      'v',
-      'b',
-      'n',
-      'm',
-      ',',
-      '.',
-      '/',
-      '↑',
-      'shift',
-      'ctrl',
-      'win',
-      'alt',
-      'space',
-      'alt',
-      '←',
-      '↓',
-      '→',
-      'ctrl',
-    ];
 
     keyLayout.forEach((key) => {
       const keyElement = document.createElement('button');
@@ -124,6 +125,7 @@ const Keyboard = {
 
       // Add attributes
       keyElement.setAttribute('type', 'button');
+      keyElement.setAttribute('data-id', `${key}`);
       keyElement.classList.add('keyboard__key');
 
       switch (key) {
@@ -133,7 +135,7 @@ const Keyboard = {
 
           keyElement.addEventListener('click', () => {
             this.properties.value = this.properties.value.substring(0, this.properties.value.length - 1);
-            this.triggerEvents('oniput');
+            this.triggerEvents('oninput');
           });
 
           break;
@@ -155,7 +157,7 @@ const Keyboard = {
 
           keyElement.addEventListener('click', () => {
             this.properties.value += '\n';
-            this.triggerEvents('oniput');
+            this.triggerEvents('oninput');
           });
 
           break;
@@ -164,19 +166,26 @@ const Keyboard = {
           keyElement.classList.add('keyboard__key--wide');
           keyElement.textContent = 'shift';
 
-          // keyElement.addEventListener('click', () => {
-          //     this.properties.value += '\n';
-          // })
-
           break;
 
         case 'Shift':
           keyElement.classList.add('keyboard__key--wide');
           keyElement.textContent = 'shift';
 
-          // keyElement.addEventListener('click', () => {
-          //     this.properties.value += '\n';
-          // })
+          break;
+
+        case 'alt':
+          keyElement.textContent = 'alt';
+
+          break;
+
+        case 'win':
+          keyElement.textContent = 'win';
+
+          break;
+
+        case 'ctrl':
+          keyElement.textContent = 'ctrl';
 
           break;
 
@@ -184,8 +193,18 @@ const Keyboard = {
           keyElement.classList.add('keyboard__key--extra-wide');
 
           keyElement.addEventListener('click', () => {
-            this.properties.value = ' ';
-            this.triggerEvents('oniput');
+            this.properties.value += ' ';
+            this.triggerEvents('oninput');
+          });
+
+          break;
+
+        case 'del':
+          keyElement.textContent = 'del';
+
+          keyElement.addEventListener('click', () => {
+            this.properties.value = '';
+            this.triggerEvents('oninput');
           });
 
           break;
@@ -201,7 +220,6 @@ const Keyboard = {
 
           break;
       }
-
       fragment.appendChild(keyElement);
 
       if (insertLineBreak) {
@@ -227,13 +245,35 @@ const Keyboard = {
     }
   },
 
-  triggerEvents(handlerName) {
-    if (this.eventHandlers[handlerName] === 'oninput') {
-      this.eventHandlers[handlerName](this.properties.value);
-    }
+  triggerEvents() {
+    textArea.innerHTML = this.properties.value;
+    // if (typeof this.eventHandlers[handlerName] === 'function') {
+    //   this.eventHandlers[handlerName](this.properties.value);
+    // }
   },
 };
 
 window.addEventListener('DOMContentLoaded', () => {
   Keyboard.init();
 });
+
+function makeActiveKey(e) {
+  const keysList = document.querySelectorAll('[data-id]');
+  keysList.forEach((key) => {
+    if (key.getAttribute('data-id') === e.key) {
+      key.classList.add('pressed');
+    }
+  });
+}
+
+function removeActiveKey(e) {
+  const keysList = document.querySelectorAll('[data-id]');
+  keysList.forEach((key) => {
+    if (key.getAttribute('data-id') === e.key) {
+      key.classList.remove('pressed');
+    }
+  });
+}
+
+document.addEventListener('keydown', (e) => makeActiveKey(e));
+document.addEventListener('keyup', (e) => removeActiveKey(e));
