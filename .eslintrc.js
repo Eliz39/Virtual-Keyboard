@@ -13,5 +13,6 @@ module.exports = {
   rules: {
     'import/prefer-default-export': 'off',
     'max-len': ['error', { code: 145 }],
+    'linebreak-style': 0,
   },
 };
