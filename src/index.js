@@ -17,9 +17,18 @@ container.appendChild(textArea);
 
 body.appendChild(container);
 
-const end = textArea.selectionEnd;
-textArea.setSelectionRange(end, end);
-textArea.focus();
+let start = textArea.selectionStart;
+const end = textArea.selectionEndt;
+
+textArea.addEventListener('click', () => {
+  if (textArea.selectionStart !== end) {
+    textArea.setSelectionRange(textArea.selectionStart, textArea.selectionEnd);
+    start = textArea.selectionStart;
+  } else {
+    start = textArea.selectionStart;
+    textArea.setSelectionRange(start, start);
+  }
+});
 
 const keyCode = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0',
   'Minus', 'Equal', 'Backspace', 'Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP',
@@ -318,7 +327,11 @@ const Keyboard = {
           keyElement.classList.add('keyboard__key--extra-wide');
 
           keyElement.addEventListener('click', () => {
-            this.properties.value += ' ';
+            if (this.properties.value) {
+              this.properties.value = `${this.properties.value.slice(0, start)} ${this.properties.value.slice(start, end)}`;
+            } else {
+              this.properties.value += ' ';
+            }
             this.triggerEvents();
           });
 
@@ -328,7 +341,11 @@ const Keyboard = {
           keyElement.textContent = 'tab';
 
           keyElement.addEventListener('click', () => {
-            this.properties.value += '  ';
+            if (this.properties.value) {
+              this.properties.value = `${this.properties.value.slice(0, start)}   ${this.properties.value.slice(start, end)}`;
+            } else {
+              this.properties.value += ' ';
+            }
             this.triggerEvents();
           });
 
@@ -338,12 +355,7 @@ const Keyboard = {
           keyElement.textContent = 'del';
 
           keyElement.addEventListener('click', () => {
-            this.properties.value = '';
-            this.triggerEvents();
-          });
-
-          keyElement.addEventListener('keydown', () => {
-            this.properties.value = '';
+            this.properties.value = `${this.properties.value.slice(0, start)}${this.properties.value.slice(start + 2, end)}`;
             this.triggerEvents();
           });
 
@@ -354,14 +366,17 @@ const Keyboard = {
           keyElement.textContent = key.toLowerCase();
 
           keyElement.addEventListener('click', () => {
-            this.properties.value += this.properties.capsLock ? key.toUpperCase() : key.toLowerCase();
+            let input = '';
+            input += this.properties.capsLock ? key.toUpperCase() : key.toLowerCase();
+            if (this.properties.value) {
+              this.properties.value = `${this.properties.value.slice(0, start)}${input}${this.properties.value.slice(start, end)}`;
+              start += input.length;
+            } else {
+              this.properties.value += this.properties.capsLock ? key.toUpperCase() : key.toLowerCase();
+            }
             this.triggerEvents();
+            // textArea.focus();
           });
-
-          // keyElement.addEventListener('keydown', (e) => {
-          //   this.properties.value += this.properties.capsLock ? e.key.toUpperCase() : e.key.toLowerCase();
-          //   this.triggerEvents();
-          // });
 
           break;
       }
