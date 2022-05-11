@@ -1,1 +1,17 @@
-# Virtual-Keyboard
+# 🚀 Welcome to virtual-keyboard project!
+
+Deploy: https://eliz39.github.io/Virtual-Keyboard/dist
+
+This project has been created using **webpack-cli**, you can now run
+
+```
+npm run build
+```
+
+or
+
+```
+yarn build
+```
+
+to bundle your application
