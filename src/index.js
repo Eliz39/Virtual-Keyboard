@@ -12,11 +12,14 @@ container.appendChild(title);
 
 const textArea = document.createElement('textarea');
 textArea.classList.add('textarea');
-textArea.setAttribute('autofocus', 'true');
 textArea.setAttribute('placeholder', 'Press left ctrl + alt to change language to Ukrainian');
 container.appendChild(textArea);
 
 body.appendChild(container);
+
+const end = textArea.selectionEnd;
+textArea.setSelectionRange(end, end);
+textArea.focus();
 
 const keyCode = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0',
   'Minus', 'Equal', 'Backspace', 'Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP',
@@ -81,7 +84,7 @@ const keyShifted = [
   '>',
   '?',
   '↑',
-  'shift',
+  'Shift',
   'ctrl',
   'win',
   'alt',
@@ -96,11 +99,11 @@ const keyShifted = [
 const keyUkrainian = ["'", '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
   'backspace', 'Tab', 'й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ї', '\\',
   'del', 'caps lock', 'ф', 'і', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'є', 'enter',
-  'Shift', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '.', '↑', 'shift', 'ctrl', 'win', 'alt', 'space', 'alt', '←', '↓', '→', 'ctrl'];
+  'shift', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '.', '↑', 'Shift', 'ctrl', 'win', 'alt', 'space', 'alt', '←', '↓', '→', 'ctrl'];
 const keyUkrainianShifted = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
   'backspace', 'Tab', 'Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х', 'Ї', '/', 'del', 'caps lock',
-  'Ф', 'І', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Є', 'enter', 'Shift', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь',
-  'Б', 'Ю', ',', '↑', 'shift', 'ctrl', 'win', 'alt', 'space', 'alt', '←', '↓', '→', 'ctrl'];
+  'Ф', 'І', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Є', 'enter', 'shift', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь',
+  'Б', 'Ю', ',', '↑', 'Shift', 'ctrl', 'win', 'alt', 'space', 'alt', '←', '↓', '→', 'ctrl'];
 
 const keyLayout = [
   '`',
@@ -145,7 +148,7 @@ const keyLayout = [
   ';',
   '\'',
   'enter',
-  'Shift',
+  'shift',
   'z',
   'x',
   'c',
@@ -157,7 +160,7 @@ const keyLayout = [
   '.',
   '/',
   '↑',
-  'shift',
+  'Shift',
   'ctrl',
   'win',
   'alt',
@@ -217,7 +220,7 @@ const Keyboard = {
 
     array.forEach((key) => {
       const keyElement = document.createElement('button');
-      const insertLineBreak = ['backspace', 'del', 'enter', 'shift'].indexOf(key) !== -1;
+      const insertLineBreak = ['backspace', 'del', 'enter', 'Shift'].indexOf(key) !== -1;
 
       // Add attributes
       keyElement.setAttribute('type', 'button');
@@ -242,6 +245,11 @@ const Keyboard = {
           keyElement.textContent = 'caps lock';
 
           keyElement.addEventListener('click', () => {
+            this.toggleCapsLock();
+            keyElement.classList.toggle('keyboard__key--capslockActive', this.properties.capsLock);
+          });
+
+          keyElement.addEventListener('keydown', () => {
             this.toggleCapsLock();
             keyElement.classList.toggle('keyboard__key--capslockActive', this.properties.capsLock);
           });
@@ -387,13 +395,20 @@ const Keyboard = {
     this.properties.shift = !this.properties.shift;
 
     if (this.properties.shift) {
-      for (let i = 0; i < this.elements.keys.length; i += 1) {
-        this.elements.keys[i].textContent = keyShifted[i];
+      while (this.elements.keysContainer.childNodes.length > 0) {
+        Keyboard.elements.keysContainer.removeChild(Keyboard.elements.keysContainer.lastChild);
       }
+      this.elements.keys = [];
+
+      this.elements.keysContainer.append(this.createKeys(this.properties.language === 'en' ? keyShifted : keyUkrainianShifted));
+      this.elements.keys = this.elements.keysContainer.querySelectorAll('.keyboard__key');
     } else {
-      for (let i = 0; i < this.elements.keys.length; i += 1) {
-        this.elements.keys[i].textContent = keyLayout[i];
+      while (this.elements.keysContainer.childNodes.length > 0) {
+        Keyboard.elements.keysContainer.removeChild(Keyboard.elements.keysContainer.lastChild);
       }
+      this.elements.keys = [];
+      this.elements.keysContainer.append(this.createKeys(this.properties.language === 'en' ? keyLayout : keyUkrainian));
+      this.elements.keys = this.elements.keysContainer.querySelectorAll('.keyboard__key');
     }
   },
 
@@ -422,10 +437,8 @@ const Keyboard = {
     document.addEventListener('keyup', (event) => {
       const keyTarget = this.elements.keys[keyCode.indexOf(event.code)];
       if (keyTarget) {
-        if (keyTarget.textContent !== 'shift' && keyTarget.textContent !== 'Shift'
-      && keyTarget.textContent !== 'ctrl' && keyTarget.textContent !== 'alt') {
-          keyTarget.dispatchEvent(touchEventImitation);
-        } else {
+        if (keyTarget.textContent === 'shift' || keyTarget.textContent === 'Shift'
+      || keyTarget.textContent === 'ctrl' || keyTarget.textContent === 'alt' || keyTarget.textContent === 'caps lock') {
           keyTarget.dispatchEvent(keyUpEventImitation);
         }
         keyTarget.classList.remove('pressed');
@@ -435,7 +448,6 @@ const Keyboard = {
 
   changeLang() {
     document.addEventListener('keydown', (e) => {
-      console.log(e.key);
       if (e.key === 'Alt') {
         Keyboard.properties.changeLangKeys += 'alt';
       }
